@@ -1,0 +1,10 @@
+package com.ss.batch.modelmapper;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+
+// MapStruct가 매핑 인터페이스를 인식하도록 설정함
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface NotificaionModelMapper {
+	
+}

@@ -1,0 +1,15 @@
+package com.ss.batch.repository;
+
+import java.time.LocalDateTime;
+
+import org.springframework.batch.test.context.SpringBatchTest;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+@SpringBatchTest
+public class ExpiredPassJobConfigTest {
+	// 데이터 추가해서 만료 시키는 메서드
+	private void addPassEntities(int size) {
+		final LocalDateTime now = LocalDateTime.now();
+	}
+}

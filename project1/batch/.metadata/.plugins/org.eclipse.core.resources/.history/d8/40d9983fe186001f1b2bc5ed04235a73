@@ -1,0 +1,28 @@
+package com.ss.batch.job.pass;
+
+import javax.persistence.EntityManagerFactory;
+
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class SendNotificationClassJobConfig {
+	private final int CHUNK_SIZE = 10;
+
+	// JOB을 생성하는 팩토리(클래스)를 생성한다.
+	private final JobBuilderFactory jobBuilderFactory;
+
+	// Step을 생성하는 팩토리 (배치 작업의 단계)
+	private final StepBuilderFactory stepBuilderFactory;
+
+	// JPA와 DB를 연결 관리하는 객체
+	private final EntityManagerFactory entityManagerFactory;
+
+	public ExpiredPassJobConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory,
+				EntityManagerFactory entityManagerFactory) {
+			this.jobBuilderFactory = jobBuilderFactory;
+			this.stepBuilderFactory = stepBuilderFactory;
+			this.entityManagerFactory = entityManagerFactory;
+		}
+}

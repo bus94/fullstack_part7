@@ -1,0 +1,8 @@
+package com.ss.batch.job.pass;
+
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class SendNotificationClassJobConfig {
+	private final int CHUNK_SIZE = 10;
+}

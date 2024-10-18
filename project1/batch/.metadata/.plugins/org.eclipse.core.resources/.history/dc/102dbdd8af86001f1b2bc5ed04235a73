@@ -1,0 +1,11 @@
+package com.ss.batch.modelmapper;
+
+import com.ss.batch.entity.BulkPassEntity;
+import com.ss.batch.entity.PassEntity;
+
+// BulkPassEntity → PassEntity로 변환
+public class PassModelMapper {
+	public static PassEntity toPassEntity (String userId, BulkPassEntity bulkPassEntity) {
+		
+	}
+}

@@ -1,0 +1,8 @@
+package com.ss.batch.modelmapper;
+
+import org.mapstruct.Mapper;
+
+@Mapper
+public interface NotificaionModelMapper {
+	
+}

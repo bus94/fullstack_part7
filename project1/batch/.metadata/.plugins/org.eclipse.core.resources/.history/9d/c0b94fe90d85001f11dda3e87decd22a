@@ -1,0 +1,17 @@
+package com.ss.batch.entity;
+
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+// 이용권 만료할 때 이용권 순번, 패키지 순번, 사용자 아이디
+// 상태 잔여이용권 수, NULL인 경우 무제한
+// 시작 일시, 종료 일시 NULL인 경우 무제한
+// 만료일자, 생성 일시, 수정 일시
+public class PassEntity {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+//	@Column(name = "pass_seq")
+	private Long pass_seq; // 이용권 순번
+}

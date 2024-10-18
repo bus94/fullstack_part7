@@ -1,0 +1,16 @@
+package com.ss.batch.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "booking")
+public class BookingEntity extends BaseEntity{
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long bookingSeq;		// 예약 순서
+	private Long passSeq;			// 어떤 이용권과 연결되어있는 예약 확인
+}

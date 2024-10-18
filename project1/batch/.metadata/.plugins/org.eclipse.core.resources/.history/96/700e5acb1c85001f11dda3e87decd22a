@@ -1,0 +1,6 @@
+package com.ss.batch.repository;
+
+@Spring
+public class ExpiredPassJobConfigTest {
+
+}

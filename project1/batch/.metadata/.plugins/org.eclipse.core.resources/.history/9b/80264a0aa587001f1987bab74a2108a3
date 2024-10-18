@@ -1,0 +1,6 @@
+package com.ss.batch.modelmapper;
+
+@Mapper
+public interface NotificaionModelMapper {
+
+}

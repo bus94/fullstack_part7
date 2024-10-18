@@ -1,0 +1,12 @@
+package com.ss.batch.entity;
+
+import javax.persistence.*;
+
+import lombok.*;
+
+@Data
+@Entity
+@Table(name = "bulk_pass")
+public class BulkPassEntity {
+
+}

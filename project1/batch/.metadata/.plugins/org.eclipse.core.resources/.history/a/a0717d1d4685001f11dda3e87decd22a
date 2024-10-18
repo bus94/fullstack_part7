@@ -1,0 +1,14 @@
+package com.ss.batch.entity;
+
+import javax.persistence.*;
+
+import lombok.*;
+
+@Data
+@Entity
+@Table(name = "user")
+public class UserEntity {
+	@Id
+	private String userId;
+	private String userName;
+}

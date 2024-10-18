@@ -1,0 +1,10 @@
+package com.ss.batch.job.pass;
+
+// 대량 이용권을 사용자 그룹에 추가하고 발송할 때 사용하는 Job, Step 구성
+// User 테이블
+// UserGroup 테이블
+// Bulk_Pass 테이블
+
+public class AddPassesJobConfig {
+	
+}

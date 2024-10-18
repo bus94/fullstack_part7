@@ -1,0 +1,14 @@
+package com.ss.batch.entity;
+
+import javax.persistence.*;
+
+import lombok.*;
+
+// 대량 이용권
+//  다수의 이용자에게 이용권을 지급
+@Data
+@Entity
+@Table(name = "bulk_pass")
+public class BulkPassEntity {
+
+}

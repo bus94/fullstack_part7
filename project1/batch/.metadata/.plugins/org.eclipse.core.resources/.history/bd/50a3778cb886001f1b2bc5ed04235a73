@@ -1,0 +1,42 @@
+package com.ss.batch.repository;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.batch.core.StepContribution;
+
+import com.ss.batch.job.pass.AddPassesTasklet;
+
+// @ExtendWith()
+public class AddPassTaskletTest {
+	// Spring batch
+	@Mock
+	private StepContribution stepContribution;
+	
+	// DB
+	@Mock
+	private PassRepository passRepository;
+	
+	@Mock
+	private BulkPassRepository bulkPassRepository;
+	
+	@Mock
+	private UserGroupMappingRepository groupRepo;
+	
+	@InjectMocks
+	private AddPassesTasklet addPassesTasklet;
+	
+	@Test
+	public void test_execute() {
+		// given
+		String userGroupId = "GROUP";
+		String userId = "A1000000";
+		Integer count = 10;
+		
+		// when
+		
+		
+		// then
+		
+	}
+}

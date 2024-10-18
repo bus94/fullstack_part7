@@ -1,0 +1,13 @@
+package com.ss.batch.entity;
+
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Table(name = "booking")
+public class BookingEntity extends BaseEntity{
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long bookingSeq;
+}

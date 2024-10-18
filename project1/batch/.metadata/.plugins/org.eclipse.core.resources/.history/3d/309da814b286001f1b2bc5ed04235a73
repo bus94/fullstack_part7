@@ -1,0 +1,21 @@
+package com.ss.batch.repository;
+
+import java.time.LocalDateTime;
+
+import org.junit.jupiter.api.Test;
+
+public class PassModelMapperTest {
+	@Test
+	public void test_toPassEntity() {
+		// given
+		LocalDateTime now = LocalDateTime.now();
+		String userId = "A10000";
+		
+		// when
+		
+		
+		// then
+		
+		
+	}
+}

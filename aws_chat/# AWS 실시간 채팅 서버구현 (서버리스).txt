@@ -1,0 +1,228 @@
+# AWS 실시간 채팅 서버구현 (서버리스)
+** region 꼭 확인하기!!
+
+1. DynamoDB 생성 
+1) 테이블명: websocket-connections ( 나중에 환경변수 필요 )
+	파티션 키: connectionId
+2. Lambda 함수 생성 
+- 요청이 들어왔을 때 실행
+Amazon CloudWatch Logs에서 로그값을 전부 확인 가능
+1) connect (연결할 때 처리)
+	함수 이름: websocket-connect
+	런타임: Python 3.12
+
+1-1) API Gateway에서 요청이 들어왔을 때 파이썬 언어로 처리하는 코드 작성
+# api 요청을 받으면 실제 실행할 람다 함수를 작성
+# 매개변수로 event, context
+
+import json # NoSQL을 이용해서 키-값으로 데이터를 주고받기 위해 json 형식의 데이터를 다루기 위한 도구
+import boto3 # AWS 서비스 이용하기 위한 라이브러리
+import os # 환경 변수를 다루기 위한 도구
+
+# DynamoDB 클라이언트 생성
+dynamodb = boto3.client('dynamodb')
+
+def lambda_handler(event, context):
+    # API Gateway에서 WebSocket을 연결할 때 connectionId를 가져온다.
+    # connectionId: 각 클라이언트의 고유한 식별키 (uuid와 비슷)
+    connectionId = event['requestContext']['connectionId']
+   
+    # DB 테이블에 연결 ID를 저장한다.
+    # put_item() 메서드를 이용해서 테이블에 데이터를 저장(삽입)한다.
+    dynamodb.put_item(
+	# TableName: 환경 변수 설정
+	# WEBSOCKET_TABLE 이라는 환경 변수 사용
+	# DynamoDB에서 변수 이름만 쓰면 알아서 해당 테이블 내용을 가져올 수 있다
+	#	이렇게 설정 안하면 일일이 다 작성해야한다.
+        TableName=os.environ['WEBSOCKET_TABLE'],
+        # Item: 저장할 데이터 항목을 정의한다. - 파티션 키 저장 (중요)
+	# 	   아이템을 저장할 때 파티션 키 이름을 정확히 작성해야한다.
+        Item={ 
+	    # 파티션 키
+            'connectionId': {
+		# S: String 타입
+		# connectionId는 문자열로 저장한다.
+                'S': connectionId
+            }
+        }
+    )
+    # Lambda 함수가 성공적으로 끝나면 빈 딕셔너리를 반환하겠다.
+    # 성공 응답 왔을 때 비어있으면 정상!
+    return {}
+
+1-2) 환경 변수 설정
+키: WEBSOCKET_TABLE 
+값: websocket-connections
+
+1-3) 권한 부여
+역할 이름 클릭 - 권한 정책 클릭 - 편집 - 시각적 - dynamoDB 선택 - put 입력하면 나오는 PutItem 체크
+DynamoDB 서비스 선택 - PutItem 검색 체크!
+위의 과정: DynamoDB 테이블에 항목을 추가하거나 기존 항목을 업데이트 하는 작업을 수행하는 권한
+
+ARN (Amazon Resource Name)
+- 작성하면 특정 테이블에 접근해서 권한을 부여받아 위의 과정에 대한 내용을 실행할 수 있다.
+- 하는 이유: 보안성을 높일 수 있다.
+리전: ap-northeast-2
+테이블명: websocket-connections
+
+# 리소스 ARN
+arn:aws:dynamodb:ap-northeast-2:703671906046:table/websocket-connections
+계정 번호: 703671906046
+
+2) disconnect (연결 종료할 때 처리)
+	함수 이름: websocket-disconnect
+	런타임: Python 3.12
+- 웹 소켓 연결이 종료될 때 실행하는 람다함수
+- 웹 소켓 연결이 종료되면 DynamoDB 연결 ID를 테이블에서 삭제하기 위해서 실행
+
+2-1) 코드
+# 필요한 라이브러리들을 가져옵니다.
+import json 
+import boto3  
+import os  
+
+dynamodb = boto3.client('dynamodb')
+
+
+def lambda_handler(event, context):
+    
+    connectionId = event['requestContext']['connectionId']
+
+    # DynamoDB 테이블에서 연결 ID를 삭제합니다.
+    # delete_item 메서드를 사용하여 테이블에서 데이터를 삭제합니다.
+    dynamodb.delete_item(
+        TableName=os.environ['WEBSOCKET_TABLE'], 
+        Key={  # 삭제할 항목의 키를 정의합니다.
+            'connectionId': {  # 'connectionId'는 테이블에서 고유하게 정의된 파티션 키입니다.
+                'S': connectionId  # 'S'는 String 타입을 나타내며, connectionId는 문자열로 저장됩니다.
+            }
+        }
+    )
+
+   
+    return {}
+
+2-2) 환경 변수 설정
+키: WEBSOCKET_TABLE 
+값: websocket-connections
+
+2-3) 권한 부여
+DynamoDB 서비스 선택 - DeleteItem 검색 체크!
+ARN 추가
+	리소스 ARN: 
+	arn:aws:dynamodb:ap-northeast-2:703671906046:table/websocket-connections
+
+3) sendMessage (실시간으로 메시지를 주고받을 때 처리)
+	함수 이름: websocket-send
+	런타임: Python 3.12
+- 메시지를 주고 받을 때 실행되는 람다함수
+
+3-1) 코드 추가
+import json  
+import boto3  
+import os 
+
+
+dynamodb = boto3.client('dynamodb')
+
+def lambda_handler(event, context):
+   
+    # 웹 소켓 클라이언트에게 받은 메시지를 꺼내오는 역할
+    # 데이터는 body에 담기는데 message라는 단어가 들어간 내용을 가져온다는 의미
+    message = json.loads(event['body'])['message']
+    
+    # DB에서 데이터를 가져올 때 페이징 처리
+    # 그러기 위해선 DB에 내용을 모두 가져와야하므로 scan을 사용
+    paginator = dynamodb.get_paginator('scan')
+    # 연결된 id를 가져오므로 리스트 형태로 받는다.
+    connectionIds = []
+
+    # apigatewaymanagementapi: 클라이언트를 각각 생성
+    # 접속하면 소켓 통신 할 수 있도록(메시지 주고받을 수 있도록) 클라이언트를 생성하는 것
+    apigatewaymanagementapi = boto3.client(
+        'apigatewaymanagementapi',
+        endpoint_url = "https://" + event["requestContext"]["domainName"] + "/" + event["requestContext"]["stage"]
+    )
+
+    # 여러 명의 연결 id를 가지고 있을 수 있기 때문에 연결 객체를 생성하고 각각의 연결 id를 뽑아서 메시지를 전송할 수 있도록 설정하는 코드 (WEBSOCKET_TABLE에서 연결 id 가져온다)
+    for page in paginator.paginate(TableName=os.environ['WEBSOCKET_TABLE']):
+        # 리스트에 extend : 여러 개의 연결 id를 한 번에 저장할 수 있도록 확장해서 저장 (append x)
+        connectionIds.extend(page['Items'])
+    
+    # 모든 connectionId에게 메시지를 전송한다. (중요)
+    for connectionId in connectionIds:
+        try:
+            # post_to_connection: 전송 메서드
+            apigatewaymanagementapi.post_to_connection(
+                ConnectionId=connectionId['connectionId']['S'],  
+		# 전송된 메시지를 Data에 저장
+                Data=message 
+            )
+        except Exception as e:
+            
+            print(f"Failed to send message to {connectionId['connectionId']['S']}: {e}")
+
+
+    return {}
+
+실행과정 => 런타임 설정 확인해보면 된다.
+- 이벤트가 발생하면 lambda_function 함수 안에 lambda_handler 메서드 실행할 수 있도록 구성해둔 것
+- 따라서 작성한 코드가 자동으로 실행하게 된다.
+
+3-2) 환경 변수 설정
+키: WEBSOCKET_TABLE 
+값: websocket-connections
+
+3-3) 권한 부여
+권한 추가
+DynamoDB 서비스 선택 - Scan 검색 체크! 
+	Scan
+	- DynamoDB에서 데이터를 전체적으로 조회하는 작업
+	- 특정 조건 없이 데이터를 읽는 작업
+	만약 대용량 데이터를 한 번에 읽어야하거나 테이블이 많은 경우 Scan보다는 Query가 더 유리할 수 있다.
+table 리소스에 ARN 추가
+	리소스 ARN: 
+	arn:aws:dynamodb:ap-northeast-2:703671906046:table/websocket-connections
+권한 추가
+ExecuteAPI 서비스 선택 - ManageConnections 검색 체크!
+	ManageConnections
+	- 웹 소켓 연결 관리 (클라이언트 연결 유지하거나 연결 끊기)
+ARN 추가할 필요x (api, stage, method 등 모두 특정해서 설정해야하므로) 
+→ 이 계정의 모든 항목으로 설정
+
+2. API Gateway 설정
+HTTP API 구축 - API 이름: api-gateway-lambda
+api-gateway-lambda에 대한 경로 - GET
+	GET 요청을 처리하기 위한 람다 함수 생성 - 람다함수 이름: aws-gateway-lambda
+GET 선택 후 통합 생성 - 람다함수 유형 선택 후 aws-gateway-lambda와 연결
+→ api-gateway-lambda의 기본 엔드포인트 url로 웹 사이트 들어가면 연결했던 aws-gateway-lambda 함수가 실행
+
+HTTP API 구축 - API 이름: api-gateway-lambda2
+	람다함수 이름: aws-gateway-lambda2
+API Gateway와 연결 - 경로 생성 - GET 선택 후 /user/{userId} 기입 후 생성
+위의 내용과 같이 url 복사 후 뒤에 /user/1?title=안녕하세요 => 웹 사이트에 {"id":"1","method":"GET","title":"안녕하세요"} 내용이 출력된다.
+
+3. WebSocket API 생성
+WebSocket API 구축 - API 이름: websocket-api - 라우팅 선택 표현식: request.body.action - 경로 connect, disconnect 추가 하기 + 사용자 지정 경로: sendMessage 추가 - 각각의 유형에 맞는 람다함수 설정하기
+stage 이름: demo 또는 chat 등등
+
+stage - 배포할 때의 환경 (개발, test, 실제 응용 등등)
+
+API 배포 - 스테이지 선택 후 배포
+
+<API Gateway - API - websocket-api - 스테이지 세부 정보 - WebSocket URL 복사> (포스트맨 프로그램 써도 됨)
+cmd - 
+npm --version / node --version 으로 확인 - 
+npm install -g wscat 입력 후 설치 - 
+wscat -c "복사한 URL 주소"
+=> Connected
+> {"action":"sendMessage", "message":"Hello! bs~"} // 우리가 만든 필드값: action
+< Hello! bs~ // 출력
+=> 다른 cmd 창을 동시에 켜서 진행하면 양방향 채팅 가능
+
+[리액트]
+npm install react-use-websocket
+
+
+
+

@@ -1,0 +1,5 @@
+package com.ss.batch.job.pass;
+
+public class SendNotificationClassJobConfig {
+	
+}

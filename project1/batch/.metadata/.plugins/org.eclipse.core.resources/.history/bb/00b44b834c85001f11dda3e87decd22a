@@ -1,0 +1,10 @@
+package com.ss.batch.entity;
+
+import javax.persistence.Id;
+
+public class UserGroupMappingId {
+	@Id
+	private String userGroupId;		// 사용자 그룹을 구별하는 ID
+	@Id
+	private String userId;			// 사용자 고유 ID
+}

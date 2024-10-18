@@ -1,0 +1,9 @@
+package com.ss.batch.modelmapper;
+
+import org.mapstruct.Mapper;
+
+// MapStruct가 매핑 인터페이스를 인식하도록 설정함
+@Mapper()
+public interface NotificaionModelMapper {
+	
+}

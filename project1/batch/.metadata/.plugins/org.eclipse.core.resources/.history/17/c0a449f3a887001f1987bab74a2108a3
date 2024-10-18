@@ -1,0 +1,22 @@
+package com.ss.batch.modelmapper;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
+
+// MapStruct가 매핑 인터페이스를 인식하도록 설정함
+// 매핑하지 않는 필드가 있으면 그냥 무시하고 넘어가도록 설정
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface NotificaionModelMapper {
+	// MapStruct가 자동으로 생성한 NotificationModelMapper 객체를 사용할 수 있도록 INSTANCE 이용해서 매퍼 사용할 수 있음
+	NotificaionModelMapper INSTANCE = Mappers.getMapper(NotificaionModelMapper.class);
+	
+	// 필드명이 같지 않거나 커스텀하게 매핑해주기 위해서는 어노테이션 @Mapping을 추가해주면 된다.
+	@Mapping(target = "uuid", source = "bookingEntity.userEntity.uuid")
+	
+	
+	
+	// 매핑을 하는 이유는 예약정보(Booking)를 기반으로 알림을 생성하고 발송하기 위해서 이 과정에서 예약과 관련된 중요한 정보가 있다. 중요정보를 (Notification) 알림 전달한다.
+	
+}

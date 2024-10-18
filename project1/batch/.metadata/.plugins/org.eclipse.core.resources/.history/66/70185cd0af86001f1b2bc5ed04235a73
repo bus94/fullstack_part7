@@ -1,0 +1,6 @@
+package com.ss.batch.modelmapper;
+
+// BulkPassEntity → PassEntity로 변환
+public class PassModelMapper {
+	
+}

@@ -1,0 +1,14 @@
+package com.ss.batch.repository;
+
+import org.junit.jupiter.api.Test;
+
+public class PassModelMapperTest {
+	@Test
+	public void test_toPassEntity() {
+		// given
+		
+		// when
+		
+		// then
+	}
+}
